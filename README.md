@@ -1,12 +1,12 @@
 # API de Transcrição de Vídeo
 
-Um serviço baseado em FastAPI para transcrição de vídeos com capacidade de diarização de falantes. Este projeto utiliza o Whisper da OpenAI para transcrição e pyannote.audio para diarização de falantes.
+Um serviço baseado em FastAPI para transcrição de vídeos. Este projeto utiliza o Whisper da OpenAI para transcrição e pyannote.audio para diarização de interlocutores.
 
 ## Funcionalidades
 
 - Extração de áudio de vídeo
 - Transcrição de áudio usando Whisper
-- Diarização de falantes usando pyannote.audio
+- Diarização de interlocutores usando pyannote.audio
 - Endpoints RESTful para upload de vídeo e transcrição
 - Processamento em segundo plano para tarefas longas
 - Banco de dados PostgreSQL para armazenar transcrições
@@ -63,7 +63,7 @@ transcriber/
 │   ├── core/
 │   │   ├── audio.py           # Processamento de áudio
 │   │   ├── audio_utils.py     # Funções utilitárias de áudio
-│   │   ├── diarization.py     # Diarização de falantes
+│   │   ├── diarization.py     # Diarização de interlocutores
 │   │   └── transcription.py   # Lógica de transcrição
 │   ├── models/
 │   │   └── schema.py          # Modelos do banco de dados
