@@ -22,13 +22,13 @@ class TranscriptionSegment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     transcription_id = Column(Integer, ForeignKey("transcriptions.id"))
-    start_time = Column(Integer)  # in seconds
-    end_time = Column(Integer)    # in seconds
+    start_time = Column(Integer)  # em segundos
+    end_time = Column(Integer)    # em segundos
     speaker = Column(String)
     text = Column(Text)
     transcription = relationship("Transcription", back_populates="segments")
 
-# Pydantic models for API
+# Modelos Pydantic para API
 class TranscriptionCreate(BaseModel):
     video_filename: str
 

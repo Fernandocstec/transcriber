@@ -18,11 +18,11 @@ from app.core.database import get_db
 
 router = APIRouter()
 
-# Configure paths
+# Configura os caminhos
 VIDEOS_DIR = "videos"
 TRANSCRIPTS_DIR = "transcripts"
 
-# Initialize components
+# Inicializa os componentes
 transcriber = WhisperTranscriber()
 diarizer = SpeakerDiarizer()
 
@@ -33,32 +33,32 @@ async def upload_and_transcribe(
     db: Session = get_db()
 ):
     """
-    Upload a video file and start the transcription process.
+    Faz upload de um arquivo de vídeo e inicia o processo de transcrição.
     """
     try:
-        # Create directories if they don't exist
+        # Cria diretórios se não existirem
         os.makedirs(VIDEOS_DIR, exist_ok=True)
         os.makedirs(TRANSCRIPTS_DIR, exist_ok=True)
         
-        # Save uploaded video
+        # Salva o vídeo enviado
         video_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
         video_path = os.path.join(VIDEOS_DIR, video_filename)
         
         with open(video_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Create transcription record
+        # Cria registro de transcrição
         transcription = Transcription(
             video_filename=video_filename,
-            audio_filename="",  # Will be updated after processing
-            transcript_filename="",  # Will be updated after processing
+            audio_filename="",  # Será atualizado após o processamento
+            transcript_filename="",  # Será atualizado após o processamento
             status="processing"
         )
         db.add(transcription)
         db.commit()
         db.refresh(transcription)
         
-        # Start background processing
+        # Inicia processamento em segundo plano
         background_tasks.add_task(
             process_transcription,
             video_path,
@@ -75,36 +75,36 @@ async def upload_and_transcribe(
 
 async def process_transcription(video_path: str, transcription_id: int, db: Session):
     """
-    Process video transcription in the background.
+    Processa a transcrição do vídeo em segundo plano.
     """
     try:
-        # Update transcription status
+        # Atualiza o status da transcrição
         transcription = db.query(Transcription).filter(Transcription.id == transcription_id).first()
         if not transcription:
             return
         
-        # Extract audio
+        # Extrai o áudio
         audio_filename = extract_audio_from_video(video_path, VIDEOS_DIR)
         transcription.audio_filename = audio_filename
         db.commit()
         
-        # Convert to mono and normalize
+        # Converte para mono e normaliza
         audio_path = os.path.join(VIDEOS_DIR, audio_filename)
         mono_path = convert_to_mono(audio_path)
         normalized_path = normalize_audio(mono_path)
         
-        # Transcribe audio
+        # Transcreve o áudio
         transcription_result = transcriber.transcribe_audio(normalized_path)
         transcript_filename = transcriber.save_transcription(transcription_result, TRANSCRIPTS_DIR)
         transcription.transcript_filename = transcript_filename
         db.commit()
         
-        # Perform diarization
+        # Realiza a diarização
         diarization_segments = diarizer.diarize_audio(normalized_path)
         transcription_segments = transcriber.process_segments(transcription_result)
         final_segments = diarizer.assign_speakers_to_segments(transcription_segments, diarization_segments)
         
-        # Save segments to database
+        # Salva os segmentos no banco de dados
         for segment in final_segments:
             db_segment = TranscriptionSegment(
                 transcription_id=transcription_id,
@@ -115,12 +115,12 @@ async def process_transcription(video_path: str, transcription_id: int, db: Sess
             )
             db.add(db_segment)
         
-        # Update transcription status
+        # Atualiza o status da transcrição
         transcription.status = "completed"
         db.commit()
         
     except Exception as e:
-        # Update transcription status to failed
+        # Atualiza o status da transcrição para falha
         transcription = db.query(Transcription).filter(Transcription.id == transcription_id).first()
         if transcription:
             transcription.status = "failed"
@@ -130,7 +130,7 @@ async def process_transcription(video_path: str, transcription_id: int, db: Sess
 @router.get("/transcripts", response_model=List[TranscriptionResponse])
 async def list_transcriptions(db: Session = get_db()):
     """
-    List all transcriptions.
+    Lista todas as transcrições.
     """
     try:
         transcriptions = db.query(Transcription).all()
@@ -141,12 +141,12 @@ async def list_transcriptions(db: Session = get_db()):
 @router.get("/transcripts/{transcription_id}", response_model=TranscriptionResponse)
 async def get_transcription(transcription_id: int, db: Session = get_db()):
     """
-    Get a specific transcription by ID.
+    Obtém uma transcrição específica por ID.
     """
     try:
         transcription = db.query(Transcription).filter(Transcription.id == transcription_id).first()
         if not transcription:
-            raise HTTPException(status_code=404, detail="Transcription not found")
+            raise HTTPException(status_code=404, detail="Transcrição não encontrada")
         return transcription
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e)) 

@@ -3,33 +3,27 @@ from typing import Generator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 from app.models.schema import Base
 from app.api.transcribe import router as transcribe_router
+from app.core.database import engine
 
-# Load environment variables
+# Carrega variáveis de ambiente
 load_dotenv()
 
-# Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/transcriber_db")
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Create database tables
+# Cria as tabelas do banco de dados
 Base.metadata.create_all(bind=engine)
 
-# FastAPI application
+# Aplicação FastAPI
 app = FastAPI(
     title="Transcriber API",
-    description="API for video transcription with speaker diarization",
+    description="API para transcrição de vídeo com diarização de falantes",
     version="1.0.0"
 )
 
-# CORS middleware
+# Middleware CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -38,20 +32,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Inclui os roteadores
 app.include_router(transcribe_router, prefix="/api", tags=["transcription"])
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Transcriber API"}
+    return {"message": "Bem-vindo à API do Transcriber"}
 
 if __name__ == "__main__":
     import uvicorn
