@@ -5,14 +5,14 @@ import os
 class SpeakerDiarizer:
     def __init__(self, auth_token: str = None):
         """
-        Initialize speaker diarization pipeline.
+        Inicializar pipeline de diarização de interlocutores.
         
         Args:
-            auth_token: Hugging Face authentication token for pyannote.audio
+            auth_token: Token de autenticação Hugging Face para pyannote.audio
         """
         self.auth_token = auth_token or os.getenv("HUGGINGFACE_TOKEN")
         if not self.auth_token:
-            raise ValueError("Hugging Face authentication token is required")
+            raise ValueError("O token de autenticação Hugging Face é necessário")
         
         self.pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization",
@@ -21,19 +21,19 @@ class SpeakerDiarizer:
     
     def diarize_audio(self, audio_path: str) -> List[Dict[str, Any]]:
         """
-        Perform speaker diarization on audio file.
+        Executar a diarização do locutor em um arquivo de áudio.
         
         Args:
-            audio_path: Path to the audio file
+            audio_path: Caminho para o arquivo de áudio
             
         Returns:
-            List of diarization segments with speaker labels
+            Lista de segmentos de diarização com rótulos de interlocutores
         """
         try:
-            # Run diarization
+            # Executar separação de locutores
             diarization = self.pipeline(audio_path)
             
-            # Convert to list of segments
+            # Converter para lista de segmentos
             segments = []
             for segment, _, speaker in diarization.itertracks(yield_label=True):
                 segments.append({
@@ -60,18 +60,18 @@ class SpeakerDiarizer:
             List of transcription segments with assigned speaker labels
         """
         try:
-            # Sort segments by start time
+            # Classificar segmentos por hora de início
             transcription_segments.sort(key=lambda x: x['start_time'])
             diarization_segments.sort(key=lambda x: x['start_time'])
             
-            # Assign speakers to transcription segments
+            # Atribuir interlocutores a segmentos de transcrição
             for trans_segment in transcription_segments:
-                # Find overlapping diarization segments
+                # Encontre segmentos de diarização sobrepostos
                 overlapping_speakers = []
                 for diar_segment in diarization_segments:
                     if (diar_segment['start_time'] <= trans_segment['end_time'] and 
                         diar_segment['end_time'] >= trans_segment['start_time']):
-                        # Calculate overlap duration
+                        # Calcular a duração da sobreposição
                         overlap_start = max(trans_segment['start_time'], diar_segment['start_time'])
                         overlap_end = min(trans_segment['end_time'], diar_segment['end_time'])
                         overlap_duration = overlap_end - overlap_start
@@ -81,7 +81,7 @@ class SpeakerDiarizer:
                             'duration': overlap_duration
                         })
                 
-                # Assign speaker with maximum overlap
+                # Atribuir interlocutor com sobreposição máxima
                 if overlapping_speakers:
                     max_overlap = max(overlapping_speakers, key=lambda x: x['duration'])
                     trans_segment['speaker'] = max_overlap['speaker']

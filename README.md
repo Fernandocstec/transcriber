@@ -1,139 +1,139 @@
-# Video Transcription API
+# API de Transcrição de Vídeo
 
-A FastAPI-based service for transcribing videos with speaker diarization capabilities. This project uses OpenAI's Whisper for transcription and pyannote.audio for speaker diarization.
+Um serviço baseado em FastAPI para transcrição de vídeos com capacidade de diarização de falantes. Este projeto utiliza o Whisper da OpenAI para transcrição e pyannote.audio para diarização de falantes.
 
-## Features
+## Funcionalidades
 
-- Video to audio extraction
-- Audio transcription using Whisper
-- Speaker diarization using pyannote.audio
-- RESTful API endpoints for video upload and transcription
-- Background processing for long-running tasks
-- PostgreSQL database for storing transcriptions
+- Extração de áudio de vídeo
+- Transcrição de áudio usando Whisper
+- Diarização de falantes usando pyannote.audio
+- Endpoints RESTful para upload de vídeo e transcrição
+- Processamento em segundo plano para tarefas longas
+- Banco de dados PostgreSQL para armazenar transcrições
 
-## Prerequisites
+## Pré-requisitos
 
 - Python 3.8+
 - PostgreSQL
-- FFmpeg (for audio processing)
-- Hugging Face account and API token (for pyannote.audio)
+- FFmpeg (para processamento de áudio)
+- Conta no Hugging Face e token de API (para pyannote.audio)
 
-## Installation
+## Instalação
 
-1. Clone the repository:
+1. Clone o repositório:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Fernandocstec/transcriber.git
 cd transcriber
 ```
 
-2. Create and activate a virtual environment:
+2. Crie e ative um ambiente virtual:
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # No Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies:
+3. Instale as dependências:
 ```bash
 pip install -e .
 ```
 
-4. Set up environment variables:
-Create a `.env` file in the root directory with the following variables:
+4. Configure as variáveis de ambiente:
+Crie um arquivo `.env` no diretório raiz com as seguintes variáveis:
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcriber_db
-HUGGINGFACE_TOKEN=your_huggingface_token
+HUGGINGFACE_TOKEN=seu_token_do_huggingface
 ```
 
-5. Initialize the database:
+5. Inicialize o banco de dados:
 ```bash
-# Create the database in PostgreSQL
+# Crie o banco de dados no PostgreSQL
 createdb transcriber_db
 
-# Run database migrations (if any)
+# Execute as migrações do banco de dados (se houver)
 alembic upgrade head
 ```
 
-## Project Structure
+## Estrutura do Projeto
 
 ```
 transcriber/
 ├── app/
 │   ├── api/
-│   │   └── transcribe.py       # API endpoints
+│   │   └── transcribe.py       # Endpoints da API
 │   ├── core/
-│   │   ├── audio.py           # Audio processing
-│   │   ├── audio_utils.py     # Audio utility functions
-│   │   ├── diarization.py     # Speaker diarization
-│   │   └── transcription.py   # Transcription logic
+│   │   ├── audio.py           # Processamento de áudio
+│   │   ├── audio_utils.py     # Funções utilitárias de áudio
+│   │   ├── diarization.py     # Diarização de falantes
+│   │   └── transcription.py   # Lógica de transcrição
 │   ├── models/
-│   │   └── schema.py          # Database models
-│   └── main.py                # FastAPI application
-├── frontend/                  # Frontend application
-├── setup.py                   # Package configuration
-└── README.md                  # This file
+│   │   └── schema.py          # Modelos do banco de dados
+│   └── main.py                # Aplicação FastAPI
+├── frontend/                  # Aplicação frontend
+├── setup.py                   # Configuração do pacote
+└── README.md                  # Este arquivo
 ```
 
-## Usage
+## Uso
 
-1. Start the API server:
+1. Inicie o servidor da API:
 ```bash
 uvicorn app.main:app --reload
 ```
 
-2. The API will be available at `http://localhost:8000`
+2. A API estará disponível em `http://localhost:8000`
 
-### API Endpoints
+### Endpoints da API
 
-- `POST /api/transcribe`: Upload a video file for transcription
-- `GET /api/transcripts`: List all transcriptions
-- `GET /api/transcripts/{transcription_id}`: Get a specific transcription
+- `POST /api/transcribe`: Envie um arquivo de vídeo para transcrição
+- `GET /api/transcripts`: Liste todas as transcrições
+- `GET /api/transcripts/{transcription_id}`: Obtenha uma transcrição específica
 
-### Example Usage
+### Exemplo de Uso
 
 ```python
 import requests
 
-# Upload a video file
+# Envie um arquivo de vídeo
 with open('video.mp4', 'rb') as f:
     files = {'file': f}
     response = requests.post('http://localhost:8000/api/transcribe', files=files)
     transcription_id = response.json()['id']
 
-# Get transcription status
+# Obtenha o status da transcrição
 response = requests.get(f'http://localhost:8000/api/transcripts/{transcription_id}')
 print(response.json())
 ```
 
-## Development
+## Desenvolvimento
 
-### Running Tests
+### Executando Testes
 
 ```bash
 pytest
 ```
 
-### Code Style
+### Estilo de Código
 
-This project uses:
-- Black for code formatting
-- isort for import sorting
-- flake8 for linting
+Este projeto utiliza:
+- Black para formatação de código
+- isort para ordenação de imports
+- flake8 para linting
 
-Run code style checks:
+Execute as verificações de estilo:
 ```bash
 black .
 isort .
 flake8
 ```
 
-## License
+## Licença
 
-[MIT License](LICENSE)
+[Licença MIT](LICENSE)
 
-## Contributing
+## Contribuindo
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request 
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature
+3. Faça commit das suas alterações
+4. Envie para a branch
+5. Abra um Pull Request 
