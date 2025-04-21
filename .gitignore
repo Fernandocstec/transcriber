@@ -1,0 +1,32 @@
+# Ambientes virtuais
+venv/
+.venv/
+
+videos/*
+
+# Arquivos de dependência de pacotes
+__pycache__/
+*.py[cod]
+
+# Configs de IDEs
+.vscode/
+.idea/
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.swp
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de build
+build/
+dist/
+*.egg-info/
+
+# Arquivos grandes não versionáveis
+*.dll
+*.lib
+*.exe
